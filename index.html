@@ -344,10 +344,10 @@ body{padding-bottom:72px}
     <div class="hero-stars">★★★★★</div>
     <div class="hero-social">4.9 · Más de 2.800 descargas</div>
     <div class="price-block">
-      <span class="price-old">47,00€</span>
-      <div class="price-new"><span class="euro">€</span>9,90</div>
+      <span class="price-old"><span data-price-eur="47.00">47,00€</span></span>
+      <div class="price-new"><span data-price-eur="9.90">9,90€</span></div>
     </div>
-    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 OBTENER MI LIBRO — 9,90€</a><br>
+    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 OBTENER MI LIBRO — <span data-price-eur="9.90">9,90€</span></a><br>
     <div class="cta-small">✓ Descarga instantánea &nbsp;&nbsp; ✓ Pago 100% seguro &nbsp;&nbsp; ✓ Garantía 7 días</div>
     <div class="scarcity-box">
       <div class="scarcity-title">⚠️ SOLO QUEDAN 305 COPIAS</div>
@@ -368,7 +368,7 @@ body{padding-bottom:72px}
     <ul class="why-list">
       <li data-icon="🌿"><strong>50 protocolos completos</strong> — con ingredientes que encuentras en cualquier supermercado</li>
       <li data-icon="⚡"><strong>Resultados en 7-14 días</strong> — no en meses. La naturaleza actúa rápido cuando se usa bien</li>
-      <li data-icon="💰"><strong>Cuesta menos que una consulta</strong> — 9,90€ por el conocimiento que vale miles en suplementos</li>
+      <li data-icon="💰"><strong>Cuesta menos que una consulta</strong> — conocimiento que vale miles en suplementos</li>
       <li data-icon="🔒"><strong>Sin efectos secundarios</strong> — remedios probados durante miles de años por civilizaciones enteras</li>
       <li data-icon="📱"><strong>Acceso inmediato</strong> — descarga en segundos, lee en el móvil o imprime</li>
     </ul>
@@ -512,8 +512,8 @@ body{padding-bottom:72px}
     <p class="section-text">Un año desde hoy, serás la persona que finalmente tomó acción — o la que siguió esperando.</p>
     <p class="section-text">Esto cuesta <strong style="color:var(--gold-light)">menos que tu próximo café.</strong> Menos que una consulta médica de 5 minutos. Menos que un suplemento que no funciona.</p>
     <p class="section-text" style="margin-bottom:32px">Tu cuerpo lleva años esperando permiso para sanar. <em style="color:var(--gold-light)">Este es el momento.</em></p>
-    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 QUIERO MI LIBRO — 9,90€</a>
-    <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:14px">Precio limitado · Antes: 47€ · Ahora: 9,90€</p>
+    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 QUIERO MI LIBRO — <span data-price-eur="9.90">9,90€</span></a>
+    <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:14px">Precio limitado · Antes: <span data-price-eur="47.00">47€</span> · Ahora: <span data-price-eur="9.90">9,90€</span></p>
   </div>
 </section>
 
@@ -548,10 +548,10 @@ body{padding-bottom:72px}
     <div class="section-tag" style="color:var(--gold-light)">Última oportunidad</div>
     <h2 class="section-title">Obtén el Libro Ahora</h2>
     <div class="price-block" style="margin:20px 0 28px">
-      <span class="price-old">Antes: 47,00€</span>
-      <div class="price-new"><span class="euro">€</span>9,90</div>
+      <span class="price-old">Antes: <span data-price-eur="47.00">47,00€</span></span>
+      <div class="price-new"><span data-price-eur="9.90">9,90€</span></div>
     </div>
-    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 COMPRAR AHORA — 9,90€</a>
+    <a href="https://pay.hotmart.com/H105843041T" class="cta-btn">🌿 COMPRAR AHORA — <span data-price-eur="9.90">9,90€</span></a>
     <p class="guarantee">✓ Garantía de 7 días · Reembolso completo si no estás satisfecho</p>
   </div>
 </div>
@@ -566,9 +566,70 @@ body{padding-bottom:72px}
 
 <!-- STICKY BOTTOM CTA -->
 <div class="sticky-cta">
-  <div class="price"><s>47€</s>&nbsp;&nbsp;<strong>9,90€</strong></div>
+  <div class="price"><s><span data-price-eur="47.00">47€</span></s>&nbsp;&nbsp;<strong><span data-price-eur="9.90">9,90€</span></strong></div>
   <a href="https://pay.hotmart.com/H105843041T">🌿 COMPRAR AHORA</a>
 </div>
+
+
+<script>
+(function () {
+  const BASE_CURRENCY = 'EUR';
+  const GEOPLUGIN_URL = 'https://www.geoplugin.net/json.gp?base_currency=EUR&jsoncallback=__geoPluginCurrencyCallback';
+
+  function fallbackFormat(amount) {
+    return amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+  }
+
+  function formatPrice(amountEur, rate, currencyCode, currencySymbol) {
+    const converted = amountEur * rate;
+
+    if (!Number.isFinite(converted) || converted <= 0) {
+      return fallbackFormat(amountEur);
+    }
+
+    try {
+      return new Intl.NumberFormat(navigator.language || 'es-ES', {
+        style: 'currency',
+        currency: currencyCode || BASE_CURRENCY,
+        minimumFractionDigits: converted >= 100 ? 0 : 2,
+        maximumFractionDigits: converted >= 100 ? 0 : 2
+      }).format(converted);
+    } catch (error) {
+      const decimals = converted >= 100 ? 0 : 2;
+      return (currencySymbol || currencyCode || '€') + converted.toLocaleString('es-ES', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+  }
+
+  window.__geoPluginCurrencyCallback = function (data) {
+    try {
+      const currencyCode = data && data.geoplugin_currencyCode ? data.geoplugin_currencyCode : BASE_CURRENCY;
+      const currencySymbol = data && (data.geoplugin_currencySymbol_UTF8 || data.geoplugin_currencySymbol);
+      const rate = data && data.geoplugin_currencyConverter ? parseFloat(data.geoplugin_currencyConverter) : 1;
+
+      if (!Number.isFinite(rate) || rate <= 0) return;
+
+      document.querySelectorAll('[data-price-eur]').forEach(function (element) {
+        const amountEur = parseFloat(element.getAttribute('data-price-eur'));
+        if (!Number.isFinite(amountEur)) return;
+        element.textContent = formatPrice(amountEur, rate, currencyCode, currencySymbol);
+      });
+    } catch (error) {
+      console.warn('GeoPlugin currency conversion failed. Keeping EUR prices.', error);
+    }
+  };
+
+  const script = document.createElement('script');
+  script.src = GEOPLUGIN_URL;
+  script.async = true;
+  script.onerror = function () {
+    console.warn('GeoPlugin unavailable. Keeping EUR prices.');
+  };
+  document.head.appendChild(script);
+})();
+</script>
 
 </body>
 </html>
